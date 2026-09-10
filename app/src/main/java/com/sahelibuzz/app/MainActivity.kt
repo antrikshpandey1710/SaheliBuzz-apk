@@ -1,12 +1,18 @@
 package com.sahelibuzz.app
 
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
@@ -22,11 +28,16 @@ class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
     private lateinit var root: FrameLayout
 
+    private var filePathCallback: ValueCallback<Array<Uri>>? = null
+
+    companion object {
+        private const val FILE_CHOOSER_REQUEST = 1001
+    }
+
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Edge-to-edge ko manually handle karenge
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         window.statusBarColor = Color.WHITE
@@ -88,16 +99,75 @@ class MainActivity : AppCompatActivity() {
             settings.apply {
                 javaScriptEnabled = true
                 domStorageEnabled = true
+
                 allowFileAccess = true
                 allowContentAccess = true
+
                 useWideViewPort = true
                 loadWithOverviewMode = true
+
+                javaScriptCanOpenWindowsAutomatically = true
+                setSupportMultipleWindows(false)
             }
 
-            webViewClient = WebViewClient()
-            webChromeClient = WebChromeClient()
+            webViewClient = object : WebViewClient() {
 
-            // Initially hidden behind splash
+                override fun shouldOverrideUrlLoading(
+                    view: WebView?,
+                    request: WebResourceRequest?
+                ): Boolean {
+
+                    val url = request?.url?.toString() ?: return false
+
+                    return if (
+                        url.startsWith("http://") ||
+                        url.startsWith("https://")
+                    ) {
+                        false
+                    } else {
+                        try {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                            startActivity(intent)
+                        } catch (_: Exception) {
+                        }
+
+                        true
+                    }
+                }
+            }
+
+            webChromeClient = object : WebChromeClient() {
+
+                override fun onShowFileChooser(
+                    webView: WebView?,
+                    filePathCallback: ValueCallback<Array<Uri>>?,
+                    fileChooserParams: FileChooserParams?
+                ): Boolean {
+
+                    this@MainActivity.filePathCallback?.onReceiveValue(null)
+
+                    this@MainActivity.filePathCallback = filePathCallback
+
+                    val intent = fileChooserParams?.createIntent()
+
+                    try {
+                        startActivityForResult(
+                            intent ?: Intent(Intent.ACTION_GET_CONTENT).apply {
+                                type = "image/*"
+                                addCategory(Intent.CATEGORY_OPENABLE)
+                            },
+                            FILE_CHOOSER_REQUEST
+                        )
+                    } catch (_: Exception) {
+
+                        this@MainActivity.filePathCallback = null
+                        return false
+                    }
+
+                    return true
+                }
+            }
+
             visibility = View.INVISIBLE
         }
 
@@ -120,7 +190,6 @@ class MainActivity : AppCompatActivity() {
 
             val params = webView.layoutParams as FrameLayout.LayoutParams
 
-            // WebView ko status bar aur navigation bar ke bahar rakho
             params.topMargin = bars.top
             params.bottomMargin = bars.bottom
 
@@ -148,8 +217,39 @@ class MainActivity : AppCompatActivity() {
         }, 1500)
     }
 
+    // ---------------- FILE PICKER RESULT ----------------
+
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == FILE_CHOOSER_REQUEST) {
+
+            val results: Array<Uri>? =
+                if (resultCode == Activity.RESULT_OK) {
+
+                    data?.data?.let {
+                        arrayOf(it)
+                    }
+
+                } else {
+                    null
+                }
+
+            filePathCallback?.onReceiveValue(results)
+            filePathCallback = null
+        }
+    }
+
+    // ---------------- BACK BUTTON ----------------
+
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
+
         if (::webView.isInitialized && webView.canGoBack()) {
             webView.goBack()
         } else {
@@ -157,10 +257,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // ---------------- CLEANUP ----------------
+
     override fun onDestroy() {
+
         if (::webView.isInitialized) {
+            webView.stopLoading()
             webView.destroy()
         }
+
+        filePathCallback?.onReceiveValue(null)
+        filePathCallback = null
+
         super.onDestroy()
     }
 }
