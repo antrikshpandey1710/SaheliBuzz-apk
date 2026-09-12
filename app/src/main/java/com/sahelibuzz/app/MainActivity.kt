@@ -104,7 +104,7 @@ class MainActivity : AppCompatActivity() {
         ViewGroup.LayoutParams.WRAP_CONTENT,
         Gravity.CENTER
     ).apply {
-        topMargin = 180.dp
+        topMargin = (180 * resources.displayMetrics.density).toInt()
     }
 )
 
