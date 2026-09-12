@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         window.statusBarColor = Color.WHITE
-        window.navigationBarColor = Color.BLACK
+        window.navigationBarColor = Color.WHITE
 
         root = FrameLayout(this)
 
