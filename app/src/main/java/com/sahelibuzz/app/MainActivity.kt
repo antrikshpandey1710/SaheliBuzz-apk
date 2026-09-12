@@ -296,5 +296,3 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
     }
 }
-private val Int.dp: Int
-    get() = (this * resources.displayMetrics.density).toInt()
