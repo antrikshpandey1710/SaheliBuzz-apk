@@ -75,12 +75,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         splash.addView(
-            title,
-            LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
-        )
+    title,
+    FrameLayout.LayoutParams(
+        ViewGroup.LayoutParams.MATCH_PARENT,
+        ViewGroup.LayoutParams.WRAP_CONTENT,
+        Gravity.CENTER
+    )
+)
 
         splash.addView(
             subtitle,
