@@ -47,25 +47,31 @@ class MainActivity : AppCompatActivity() {
 
         // ---------------- SPLASH SCREEN ----------------
 
-        val splash = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER
-            setBackgroundColor(Color.WHITE)
+        val splash = FrameLayout(this).apply {
+    setBackgroundColor(Color.WHITE)
         }
 
         val title = TextView(this).apply {
-            text = "SaheliBuzz"
-            textSize = 38f
-            setTextColor(Color.rgb(210, 20, 110))
-            gravity = Gravity.CENTER
+    text = "SaheliBuzz"
+    textSize = 34f
+    typeface = android.graphics.Typeface.create(
+        "sans-serif",
+        android.graphics.Typeface.BOLD
+    )
+    setTextColor(Color.rgb(210, 20, 110))
+    gravity = Gravity.CENTER
         }
 
         val subtitle = TextView(this).apply {
-            text = "BY VAIBHAV"
-            textSize = 16f
-            setTextColor(Color.DKGRAY)
-            gravity = Gravity.CENTER
-            setPadding(0, 8, 0, 0)
+    text = "BY VAIBHAV"
+    textSize = 13f
+    letterSpacing = 0.18f
+    typeface = android.graphics.Typeface.create(
+        "sans-serif-medium",
+        android.graphics.Typeface.NORMAL
+    )
+    setTextColor(Color.rgb(110, 110, 110))
+    gravity = Gravity.CENTER
         }
 
         splash.addView(
@@ -83,6 +89,24 @@ class MainActivity : AppCompatActivity() {
                 ViewGroup.LayoutParams.WRAP_CONTENT
             )
         )
+        val tagline = TextView(this).apply {
+    text = "Connect • Chat • Share"
+    textSize = 12f
+    letterSpacing = 0.08f
+    setTextColor(Color.rgb(150, 150, 150))
+    gravity = Gravity.CENTER
+        }
+
+    splash.addView(
+    tagline,
+    FrameLayout.LayoutParams(
+        ViewGroup.LayoutParams.MATCH_PARENT,
+        ViewGroup.LayoutParams.WRAP_CONTENT,
+        Gravity.CENTER
+    ).apply {
+        topMargin = 180.dp
+    }
+)
 
         root.addView(
             splash,
@@ -272,3 +296,5 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
     }
 }
+private val Int.dp: Int
+    get() = (this * resources.displayMetrics.density).toInt()
