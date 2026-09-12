@@ -83,13 +83,16 @@ class MainActivity : AppCompatActivity() {
     )
 )
 
-        splash.addView(
-            subtitle,
-            LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
-        )
+       splash.addView(
+    subtitle,
+    FrameLayout.LayoutParams(
+        ViewGroup.LayoutParams.MATCH_PARENT,
+        ViewGroup.LayoutParams.WRAP_CONTENT,
+        Gravity.CENTER
+    ).apply {
+        topMargin = (50 * resources.displayMetrics.density).toInt()
+    }
+) 
         val tagline = TextView(this).apply {
     text = "Connect • Chat • Share"
     textSize = 12f
